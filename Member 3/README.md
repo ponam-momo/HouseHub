@@ -10,7 +10,7 @@ B.sc in Computer Science
 
 Submitted by:
 
-Punom Das Momo(202204031)	Foujia Akther(202204009)	Mansora Akther Mim (202104028)
+Punom Das Momo(202204031),	Foujia Akther(202204009),	Mansora Akther Mim (202104028)
 		
 Session:2022-23
 

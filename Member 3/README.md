@@ -1,7 +1,11 @@
 # HouseHub
+
 (House Rental Management System)
+
 Software Engineering Project Report
+
 Course Code:3112
+
 B.sc in Computer Science
 
 Submitted by:

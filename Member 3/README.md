@@ -120,12 +120,18 @@ wishlist_	     ( id, tenant_id, listing_id	just a reference table to store saved
 
 6.	 Tools and Technology
 
-Part	Technology
+Part	_  Technology
+
 Frontend	HTML, CSS, Bootstrap 5, JavaScript (fetch API)
+
 Backend	Node.js, Express.js
+
 Database	MySQL
+
 Auth	JWT + bcrypt
+
 Image Upload	Multer
+
 
 
 7.	 Rough Timeline

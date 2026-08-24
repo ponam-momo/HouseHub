@@ -98,11 +98,17 @@ Below is a rough idea of the main tables we will need. This may change a bit onc
 
 Table _ 	Key Fields	 _ Notes
 
+
 users _	          id, role	name, email, password(hashed), phone, role(owner/tenant/admin)
+
 listings_	      id, owner_id	title, description, location, price, room_type, bedrooms, amenities, status
+
 listing_images_   id, listing_id	image_url
+
 requests_	      id, listing_id, tenant_id	status(pending/accepted/rejected), created_at
+
 wishlist_	      id, tenant_id, listing_id	just a reference table to store saved listings
+
 
 
 5.	

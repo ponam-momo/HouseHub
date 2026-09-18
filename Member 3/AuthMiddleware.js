@@ -11,7 +11,7 @@ function authRequired(req, res, next) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'Login please, Token can't found' });
+    return res.status(401).json({ error: 'Login please, Token not found' });
   }
 
   const token = authHeader.split(' ')[1];
@@ -21,7 +21,7 @@ function authRequired(req, res, next) {
     req.user = decoded; // { id, name, email, role }
     next();
   } catch (err) {
-    return res.status(401).json({ error: 'Token invalid or expired।' });
+    return res.status(401).json({ error: "Token invalid or expired।" });
   }
 }
 

@@ -1,5 +1,4 @@
- const express = require("express");
-require('dotenv').config();
+const express = require("express");
 const authRoutes = require("./Member 1/auth");
 
 const app = express();

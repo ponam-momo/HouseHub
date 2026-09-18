@@ -1,5 +1,5 @@
 // uploadMiddleware.js — Multer image upload config
-// Member 2 - Foujia Akther (202204009)
+// Member 2
 
 const multer = require('multer');
 const path = require('path');

@@ -1,5 +1,5 @@
 // listingController.js — Listing business logic
-// Member 2 - Foujia Akther (202204009)
+// Member 2
 
 const db = require('../Config/db');
 

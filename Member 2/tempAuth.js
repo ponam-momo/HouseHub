@@ -1,31 +1,24 @@
-// JWT token verify 
-// Member 3 - Mansora Akther Mim (202104028)
-// Note: match with Member 1 JWT secret
+// tempAuth.js — TEMPORARY, testing er jonno
+// Asol auth system thik howar por eta delete hobe
 
 const jwt = require('jsonwebtoken');
-
 const JWT_SECRET = process.env.JWT_SECRET || 'househub_secret_key';
 
-// Login check 
 function authRequired(req, res, next) {
   const authHeader = req.headers.authorization;
-
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'Login please, Token not found' });
+    return res.status(401).json({ error: "Login please, Token can't found" });
   }
-
   const token = authHeader.split(' ')[1];
-
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded; // { id, name, email, role }
+    req.user = decoded;
     next();
   } catch (err) {
-    return res.status(401).json({ error: "Token invalid or expired।" });
+    return res.status(401).json({ error: 'Token invalid or expired' });
   }
 }
 
-// Specific role check
 function requireRole(...roles) {
   return (req, res, next) => {
     if (!req.user || !roles.includes(req.user.role)) {

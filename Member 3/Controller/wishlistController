@@ -1,0 +1,105 @@
+// controllers/wishlistController.js
+// Wishlist (Save for Later) Module - Controller
+// Member 3 - Mansora Akther Mim (202104028)
+
+const db = require('../config/db');
+
+// POST /api/wishlist/:listing_id
+// Wishlist এ add করো (toggle — already থাকলে remove করবে)
+const toggleWishlist = async (req, res) => {
+  try {
+    const tenant_id = req.user.id;
+    const listing_id = req.params.listing_id;
+
+    // Listing আছে কিনা check
+    const [listings] = await db.execute(
+      `SELECT id FROM listings WHERE id = ?`,
+      [listing_id]
+    );
+
+    if (listings.length === 0) {
+      return res.status(404).json({ error: 'Listing পাওয়া যায়নি।' });
+    }
+
+    // Already wishlist এ আছে কিনা check
+    const [existing] = await db.execute(
+      `SELECT id FROM wishlist WHERE tenant_id = ? AND listing_id = ?`,
+      [tenant_id, listing_id]
+    );
+
+    if (existing.length > 0) {
+      // Already আছে → Remove করো
+      await db.execute(
+        `DELETE FROM wishlist WHERE tenant_id = ? AND listing_id = ?`,
+        [tenant_id, listing_id]
+      );
+      return res.status(200).json({ success: true, saved: false, message: 'Wishlist থেকে সরানো হয়েছে।' });
+    } else {
+      // নেই → Add করো
+      await db.execute(
+        `INSERT INTO wishlist (tenant_id, listing_id, created_at) VALUES (?, ?, NOW())`,
+        [tenant_id, listing_id]
+      );
+      return res.status(201).json({ success: true, saved: true, message: 'Wishlist এ যোগ করা হয়েছে।' });
+    }
+  } catch (err) {
+    console.error('Toggle wishlist error:', err);
+    res.status(500).json({ error: 'Wishlist update করতে সমস্যা হয়েছে।' });
+  }
+};
+
+// GET /api/wishlist
+// Tenant তার সব saved listings দেখবে
+const getMyWishlist = async (req, res) => {
+  try {
+    const tenant_id = req.user.id;
+
+    const [wishlist] = await db.execute(
+      `SELECT 
+        w.id AS wishlist_id,
+        w.created_at AS saved_at,
+        l.id AS listing_id,
+        l.title,
+        l.description,
+        l.location,
+        l.price,
+        l.room_type,
+        l.bedrooms,
+        l.status,
+        u.name AS owner_name,
+        (SELECT image_url FROM listing_images WHERE listing_id = l.id LIMIT 1) AS image
+       FROM wishlist w
+       JOIN listings l ON w.listing_id = l.id
+       JOIN users u ON l.owner_id = u.id
+       WHERE w.tenant_id = ?
+       ORDER BY w.created_at DESC`,
+      [tenant_id]
+    );
+
+    res.status(200).json({ success: true, count: wishlist.length, wishlist });
+  } catch (err) {
+    console.error('Get wishlist error:', err);
+    res.status(500).json({ error: 'Wishlist আনতে সমস্যা হয়েছে।' });
+  }
+};
+
+// GET /api/wishlist/check/:listing_id
+// কোনো listing wishlist এ আছে কিনা check করো (frontend button state এর জন্য)
+const checkWishlist = async (req, res) => {
+  try {
+    const tenant_id = req.user.id;
+    const listing_id = req.params.listing_id;
+
+    const [rows] = await db.execute(
+      `SELECT id FROM wishlist WHERE tenant_id = ? AND listing_id = ?`,
+      [tenant_id, listing_id]
+    );
+
+    res.status(200).json({ success: true, saved: rows.length > 0 });
+  } catch (err) {
+    console.error('Check wishlist error:', err);
+    res.status(500).json({ error: 'Check করতে সমস্যা হয়েছে।' });
+  }
+};
+
+module.exports = { toggleWishlist, getMyWishlist, checkWishlist };

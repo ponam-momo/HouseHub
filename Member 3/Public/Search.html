@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HouseHub — Search Listings</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: #f8f9fa; }
+    .hero { background: #2c3e50; color: white; padding: 40px 0 30px; }
+    .card-listing { transition: transform 0.2s; border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .card-listing:hover { transform: translateY(-4px); box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
+    .badge-available { background: #27ae60; }
+    .badge-unavailable { background: #e74c3c; }
+    .wishlist-btn { cursor: pointer; font-size: 1.2rem; }
+    .wishlist-btn.saved { color: #e74c3c; }
+    .wishlist-btn.unsaved { color: #bdc3c7; }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-dark" style="background:#2c3e50;">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="#">🏠 HouseHub</a>
+    <div>
+      <a href="my-requests.html" class="btn btn-outline-light btn-sm me-2">My Requests</a>
+      <a href="wishlist.html" class="btn btn-outline-light btn-sm me-2">❤️ Saved</a>
+      <a href="login.html" class="btn btn-light btn-sm" id="auth-btn">Login</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero + Search Bar -->
+<div class="hero">
+  <div class="container">
+    <h2 class="fw-bold mb-1">Find Your Next Home</h2>
+    <p class="text-white-50 mb-4">Search and filter from hundreds of listings</p>
+
+    <div class="card p-3">
+      <div class="row g-2">
+        <div class="col-md-3">
+          <input type="text" class="form-control" id="s-location" placeholder="📍 Location (e.g. Dhaka)">
+        </div>
+        <div class="col-md-2">
+          <input type="number" class="form-control" id="s-min" placeholder="Min Price ৳">
+        </div>
+        <div class="col-md-2">
+          <input type="number" class="form-control" id="s-max" placeholder="Max Price ৳">
+        </div>
+        <div class="col-md-2">
+          <select class="form-select" id="s-type">
+            <option value="">All Types</option>
+            <option value="single room">Single Room</option>
+            <option value="full house">Full House</option>
+            <option value="mess">Mess</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <input type="text" class="form-control" id="s-keyword" placeholder="🔍 Keyword">
+        </div>
+        <div class="col-md-1">
+          <button class="btn btn-primary w-100" onclick="doSearch()">Search</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Results -->
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 id="result-title">Available Listings</h5>
+    <span class="text-muted" id="result-count"></span>
+  </div>
+  <div class="row g-3" id="listings-grid">
+    <div class="col-12 text-center py-5">
+      <div class="spinner-border text-primary"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = 'http://localhost:3000/api';
+  const token = localStorage.getItem('hh_token');
+  const user = JSON.parse(localStorage.getItem('hh_user') || 'null');
+
+  // Navbar update
+  if (user) {
+    document.getElementById('auth-btn').textContent = 'Logout';
+    document.getElementById('auth-btn').onclick = () => {
+      localStorage.clear();
+      location.reload();
+    };
+  }
+
+  async function doSearch() {
+    const location = document.getElementById('s-location').value;
+    const minPrice = document.getElementById('s-min').value;
+    const maxPrice = document.getElementById('s-max').value;
+    const room_type = document.getElementById('s-type').value;
+    const keyword = document.getElementById('s-keyword').value;
+
+    const params = new URLSearchParams();
+    if (location) params.set('location', location);
+    if (minPrice) params.set('minPrice', minPrice);
+    if (maxPrice) params.set('maxPrice', maxPrice);
+    if (room_type) params.set('room_type', room_type);
+    if (keyword) params.set('keyword', keyword);
+
+    document.getElementById('result-title').textContent = 'Search Results';
+    document.getElementById('listings-grid').innerHTML = `
+      <div class="col-12 text-center py-5"><div class="spinner-border text-primary"></div></div>`;
+
+    try {
+      const res = await fetch(`${API}/search?${params.toString()}`);
+      const data = await res.json();
+      renderListings(data.listings || []);
+    } catch (e) {
+      document.getElementById('listings-grid').innerHTML =
+        `<div class="col-12 text-center text-danger py-4">Server চালু আছে কিনা দেখুন।</div>`;
+    }
+  }
+
+  function renderListings(listings) {
+    const grid = document.getElementById('listings-grid');
+    document.getElementById('result-count').textContent = listings.length + ' টি পাওয়া গেছে';
+
+    if (listings.length === 0) {
+      grid.innerHTML = `<div class="col-12 text-center py-5 text-muted">
+        <h5>কোনো listing পাওয়া যায়নি।</h5>
+        <p>অন্য filter চেষ্টা করুন।</p></div>`;
+      return;
+    }
+
+    grid.innerHTML = listings.map(l => `
+      <div class="col-md-4">
+        <div class="card card-listing h-100">
+          <img src="${l.image || 'https://placehold.co/400x220?text=No+Image'}"
+               class="card-img-top" style="height:200px;object-fit:cover;" alt="${l.title}">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+              <h6 class="card-title fw-bold mb-1">${l.title}</h6>
+              ${user && user.role === 'tenant' ? `
+                <span class="wishlist-btn unsaved" id="wish-${l.id}"
+                  onclick="toggleWish(${l.id})" title="Save to wishlist">♥</span>` : ''}
+            </div>
+            <p class="text-muted small mb-1">📍 ${l.location}</p>
+            <p class="text-muted small mb-2">🏠 ${l.room_type} | 🛏 ${l.bedrooms} room</p>
+            <p class="small text-secondary mb-2" style="overflow:hidden;max-height:40px">
+              ${l.description || ''}</p>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="fw-bold text-primary">৳${Number(l.price).toLocaleString()}/mo</span>
+              <span class="badge ${l.status === 'available' ? 'badge-available' : 'badge-unavailable'} text-white">
+                ${l.status}</span>
+            </div>
+          </div>
+          <div class="card-footer bg-white border-0">
+            <a href="listing-details.html?id=${l.id}" class="btn btn-outline-primary btn-sm w-100">
+              View Details →</a>
+          </div>
+        </div>
+      </div>`).join('');
+
+    // Wishlist state check করো
+    if (user && user.role === 'tenant' && token) {
+      listings.forEach(l => checkWishState(l.id));
+    }
+  }
+
+  async function checkWishState(listing_id) {
+    try {
+      const res = await fetch(`${API}/wishlist/check/${listing_id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      const btn = document.getElementById(`wish-${listing_id}`);
+      if (btn) {
+        btn.classList.toggle('saved', data.saved);
+        btn.classList.toggle('unsaved', !data.saved);
+      }
+    } catch {}
+  }
+
+  async function toggleWish(listing_id) {
+    if (!token) { alert('Wishlist এ save করতে login করুন।'); return; }
+    try {
+      const res = await fetch(`${API}/wishlist/${listing_id}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      const btn = document.getElementById(`wish-${listing_id}`);
+      if (btn) {
+        btn.classList.toggle('saved', data.saved);
+        btn.classList.toggle('unsaved', !data.saved);
+      }
+    } catch {}
+  }
+
+  // Page load হলে সব listings দেখাও
+  doSearch();
+</script>
+</body>
+</html>

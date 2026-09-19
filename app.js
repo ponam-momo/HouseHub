@@ -1,6 +1,8 @@
- const express = require("express");
+const express = require("express");
 require('dotenv').config();
 const authRoutes = require("./Member 1/auth");
+const listingRoutes = require("./Member 2/listingRoutes");
+const adminRoutes = require("./Admin/adminRoutes");
 
 const app = express();
 app.use(express.json());
@@ -12,7 +14,9 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/listings", listingRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
-});
+}); 

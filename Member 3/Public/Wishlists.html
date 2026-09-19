@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HouseHub — My Saved Listings</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: #f8f9fa; }
+    .card-listing { border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: transform 0.2s; }
+    .card-listing:hover { transform: translateY(-3px); }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-dark" style="background:#2c3e50;">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="search.html">🏠 HouseHub</a>
+    <div>
+      <a href="my-requests.html" class="btn btn-outline-light btn-sm me-2">My Requests</a>
+      <button onclick="logout()" class="btn btn-outline-light btn-sm">Logout</button>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-4">
+  <h4 class="mb-1">❤️ My Saved Listings</h4>
+  <p class="text-muted mb-4">পরে দেখার জন্য save করা listings</p>
+  <div class="row g-3" id="wishlist-grid">
+    <div class="col-12 text-center py-5"><div class="spinner-border text-primary"></div></div>
+  </div>
+</div>
+
+<script>
+  const API = 'http://localhost:3000/api';
+  const token = localStorage.getItem('hh_token');
+  const user = JSON.parse(localStorage.getItem('hh_user') || 'null');
+
+  if (!token || !user || user.role !== 'tenant') {
+    alert('Tenant হিসেবে login করুন।');
+    window.location.href = 'login.html';
+  }
+
+  function logout() { localStorage.clear(); window.location.href = 'login.html'; }
+
+  async function loadWishlist() {
+    try {
+      const res = await fetch(`${API}/wishlist`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      const grid = document.getElementById('wishlist-grid');
+
+      if (!data.wishlist || data.wishlist.length === 0) {
+        grid.innerHTML = `<div class="col-12 text-center py-5 text-muted">
+          <h5>কোনো saved listing নেই।</h5>
+          <p>Search করে listing পছন্দ হলে ♥ বাটনে ক্লিক করুন।</p>
+          <a href="search.html" class="btn btn-primary">Listings দেখুন</a>
+        </div>`;
+        return;
+      }
+
+      grid.innerHTML = data.wishlist.map(l => `
+        <div class="col-md-4" id="wish-card-${l.listing_id}">
+          <div class="card card-listing h-100">
+            <img src="${l.image || 'https://placehold.co/400x200?text=No+Image'}"
+                 class="card-img-top" style="height:180px;object-fit:cover;" alt="${l.title}">
+            <div class="card-body">
+              <h6 class="fw-bold mb-1">${l.title}</h6>
+              <p class="text-muted small mb-1">📍 ${l.location}</p>
+              <p class="text-muted small mb-2">🏠 ${l.room_type} | Owner: ${l.owner_name}</p>
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="fw-bold text-primary">৳${Number(l.price).toLocaleString()}/mo</span>
+                <span class="badge ${l.status === 'available' ? 'bg-success' : 'bg-danger'}">
+                  ${l.status}</span>
+              </div>
+            </div>
+            <div class="card-footer bg-white border-0 d-flex gap-2">
+              <a href="listing-details.html?id=${l.listing_id}"
+                 class="btn btn-outline-primary btn-sm flex-grow-1">View Details</a>
+              <button class="btn btn-outline-danger btn-sm"
+                onclick="removeFromWishlist(${l.listing_id})" title="Remove from saved">
+                🗑️
+              </button>
+            </div>
+          </div>
+        </div>`).join('');
+    } catch (e) {
+      document.getElementById('wishlist-grid').innerHTML =
+        `<div class="col-12 text-danger text-center">Error loading wishlist.</div>`;
+    }
+  }
+
+  async function removeFromWishlist(listing_id) {
+    try {
+      await fetch(`${API}/wishlist/${listing_id}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      // Card টা সরিয়ে দাও
+      const card = document.getElementById(`wish-card-${listing_id}`);
+      if (card) card.remove();
+      // যদি আর কোনো card না থাকে
+      if (!document.querySelector('#wishlist-grid .col-md-4')) {
+        document.getElementById('wishlist-grid').innerHTML = `
+          <div class="col-12 text-center py-5 text-muted">
+            <h5>Wishlist empty হয়ে গেছে।</h5>
+            <a href="search.html" class="btn btn-primary">Listings দেখুন</a>
+          </div>`;
+      }
+    } catch { alert('Error removing from wishlist.'); }
+  }
+
+  loadWishlist();
+</script>
+</body>
+</html>

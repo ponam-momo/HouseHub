@@ -24,8 +24,9 @@ router.post('/register', async (req, res) => {
     );
 
     res.status(201).json({ message: 'Registered successfully' });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+     } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message || 'Unknown error' });
   }
 });
 

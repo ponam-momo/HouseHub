@@ -21,10 +21,10 @@ app.use('/api/listings', require('./listingRoutes'));
 
 // ── Root route ───────────────────────────────────
 app.get('/', (req, res) => {
-  res.send('Listing module running ✅');
+  res.send('Listing module running ');
 });
 
 // ── Start server ─────────────────────────────────
 app.listen(PORT, () => {
-  console.log(`✅ Listing module server running at http://localhost:${PORT}`);
+  console.log(` Listing module server running at http://localhost:${PORT}`);
 });

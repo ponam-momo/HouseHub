@@ -1,6 +1,6 @@
 // adminController.js — Admin Dashboard business logic
 
-const db = require('../Config/db');
+const db = require('../../Config/db');
 
 // GET /api/admin/users — shob user dekhano
 async function getAllUsers(req, res) {

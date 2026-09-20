@@ -1,5 +1,4 @@
 // app.js — HouseHub (Listing module standalone test server)
-// Member 2 - Foujia Akther (202204009)
 
 const express = require('express');
 const cors = require('cors');

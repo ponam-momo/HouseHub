@@ -1,5 +1,4 @@
 // app.js — HouseHub (Listing module standalone test server)
-// Member 2 - Foujia Akther (202204009)
 
 const express = require('express');
 const cors = require('cors');
@@ -22,10 +21,10 @@ app.use('/api/listings', require('./listingRoutes'));
 
 // ── Root route ───────────────────────────────────
 app.get('/', (req, res) => {
-  res.send('Listing module running ✅');
+  res.send('Listing module running ');
 });
 
 // ── Start server ─────────────────────────────────
 app.listen(PORT, () => {
-  console.log(`✅ Listing module server running at http://localhost:${PORT}`);
+  console.log(` Listing module server running at http://localhost:${PORT}`);
 });

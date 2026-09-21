@@ -1,6 +1,49 @@
 // adminController.js — Admin Dashboard business logic
 
 const db = require('../../Config/db');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET || 'househub_secret_key';
+
+// POST /api/admin/login — admin email + password diye login
+async function adminLogin(req, res) {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password required' });
+    }
+
+    const [[admin]] = await db.query(
+      'SELECT * FROM users WHERE email = ? AND role = ?',
+      [email, 'admin']
+    );
+
+    if (!admin) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    const match = await bcrypt.compare(password, admin.password);
+    if (!match) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    const token = jwt.sign(
+      { id: admin.id, role: admin.role },
+      JWT_SECRET,
+      { expiresIn: '8h' }
+    );
+
+    res.json({
+      message: 'Login successful',
+      token,
+      admin: { id: admin.id, name: admin.name, email: admin.email },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error during admin login' });
+  }
+}
 
 // GET /api/admin/users — shob user dekhano
 async function getAllUsers(req, res) {
@@ -69,4 +112,5 @@ module.exports = {
   getAllListingsAdmin,
   toggleBlockUser,
   deleteListingAdmin,
+  adminLogin,
 };

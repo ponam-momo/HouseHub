@@ -1,4 +1,4 @@
-// app.js — HouseHub (Listing module standalone test server)
+// app.js — HouseHub (Listing + Admin + Auth module test server)
 
 const express = require('express');
 const cors = require('cors');
@@ -8,7 +8,7 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// ── Middleware ─────────────────────────────────
+// ── Middleware ─────────────────────────────
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -16,15 +16,24 @@ app.use(express.urlencoded({ extended: true }));
 // serve uploaded listing images
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// ── Routes — Member 2 (Listing CRUD) ────────────
+// serve admin frontend (login.html)
+app.use('/admin', express.static(path.join(__dirname, 'Admin')));
+
+// ── Routes — Member 1 (Auth: register/login) ──
+app.use('/api/auth', require('../Member 1/auth'));
+
+// ── Routes — Member 2 (Listing CRUD) ─────────
 app.use('/api/listings', require('./listingRoutes'));
 
-// ── Root route ───────────────────────────────────
+// ── Routes — Admin Dashboard ──────────────────
+app.use('/api/admin', require('./Admin/adminRoutes'));
+
+// ── Root route ──────────────────────────────
 app.get('/', (req, res) => {
-  res.send('Listing module running ');
+  res.send('Listing + Admin module running');
 });
 
-// ── Start server ─────────────────────────────────
+// ── Start server ─────────────────────────────
 app.listen(PORT, () => {
-  console.log(` Listing module server running at http://localhost:${PORT}`);
+  console.log(`Server running at http://localhost:${PORT}`);
 });

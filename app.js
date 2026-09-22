@@ -7,7 +7,7 @@ const adminRoutes = require("./Member 2/Admin/adminRoutes");
 
 const app = express();
 app.use(express.json());
-
+app.use(express.static(__dirname));
 const PORT = 3000;
 
 app.get("/", (req, res) => {

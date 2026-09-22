@@ -8,7 +8,7 @@ const { authRequired } = require('../Member 3/AuthMiddleware');
 
 const router = express.Router();
 
-// GET profile — show information
+// GET profile — show own information
 router.get('/profile', authRequired, async (req, res) => {
   try {
     const [users] = await db.query(
@@ -27,7 +27,7 @@ router.get('/profile', authRequired, async (req, res) => {
   }
 });
 
-// PUT profile — name/date updating
+// PUT profile — name/phone number updating
 router.put('/profile', authRequired, async (req, res) => {
   try {
     const { name, phone } = req.body;

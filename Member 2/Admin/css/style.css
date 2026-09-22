@@ -1,0 +1,25 @@
+/* style.css — Admin Dashboard shared styles */
+
+body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1e293b, #334155);
+}
+
+.login-card {
+  max-width: 380px;
+  width: 100%;
+}
+
+body.dashboard-body {
+  background: #f1f5f9;
+}
+
+.navbar-custom {
+  background: #1e293b;
+}
+
+.stat-card {
+  border-radius: 10px;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
